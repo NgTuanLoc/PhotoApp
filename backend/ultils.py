@@ -5,6 +5,7 @@ from IPython.display import display
 import tensorflow.compat.v1 as tf
 import cv2 as cv
 import os
+from age_detect import *
 
 tf.disable_v2_behavior()
 
@@ -128,19 +129,32 @@ def load_weights(variables, file_name):
 
     return assign_ops
 
-def draw_boxes(img_names, boxes_dicts, class_names, model_size, faces_info):
-    """Draws detected boxes.
+def crop_person(image_path, save_name, bounding_box):
+    # Opens a image in RGB mode
+    test = Image.open(image_path)
+    # Size of the image in pixels (size of original image)
+    # (This is not mandatory)
+    width, height = test.size
 
+    left, top, right, bottom =bounding_box
+
+    # Cropped image of above dimension
+    # (It will not change original image)
+    im1 = test.crop((left, top, right, bottom))
+
+    # Shows the image in image viewer
+    im1.save(save_name)
+
+def draw_boxes(img_names, boxes_dicts, class_names, model_size):
+    """Draws detected boxes.
     Args:
         img_names: A list of input images names.
         boxes_dict: A class-to-boxes dictionary.
         class_names: A class names list.
         model_size: The input size of the model.
-
     Returns:
         None.
     """
-    print(faces_info)
     colors = ((np.array(color_palette("hls", 80)) * 255)).astype(np.uint8)
     for num, img_name, boxes_dict in zip(range(len(img_names)), img_names,
                                          boxes_dicts):
@@ -164,23 +178,34 @@ def draw_boxes(img_names, boxes_dicts, class_names, model_size, faces_info):
                         xy[0], xy[1] = xy[0] + t, xy[1] + t
                         xy[2], xy[3] = xy[2] - t, xy[3] - t
                         draw.rectangle(xy, outline=tuple(color))
+                    
                     text = '{} {:.1f}%'.format(class_names[cls],
                                                confidence * 100)
                     text_size = draw.textsize(text, font=font)
                     draw.rectangle(
                         [x0, y0 - text_size[1], x0 + text_size[0], y0],
                         fill=tuple(color))
+                    
                     draw.text((x0, y0 - text_size[1]), text, fill='black',
                               font=font)
-                    if(class_names[cls]=="person"):
-                        print(faces_info)
-                        print(faces_id)
-                        age, gender = faces_info[faces_id]
-                        faces_id+=1
-                        draw.text((x0, y0 ), "Age predicted: {}".format(age), fill='blue',
-                              font=font)
-                        draw.text((x0, y0 + text_size[1]), "Gender predicted: {}".format(gender), fill='yellow',
-                              font=font)                        
+                    if(class_names[cls]=="person"): 
+                #         print('''
+                #     x0: {0}
+                #     y0: {1}
+                #     x1: {2}
+                #     y2: {3}
+                # '''.format(xy[0], xy[1] , xy[2] , xy[3]))
+
+                        detected_person = "./data/human/person_{0}.jpg".format(faces_id)
+                        crop_person("./data/uploads/img.png",detected_person, xy)
+                        face_info = age_detection(detected_person, faces_id)
+                        if(face_info):
+                            age, gender = face_info[0]
+                            faces_id+=1
+                            draw.text((x0, y0 ), "Age predicted: {}".format(age), fill='blue',
+                                font=font)
+                            draw.text((x0, y0 + text_size[1]), "Gender predicted: {}".format(gender), fill='yellow',
+                                font=font)                        
         img.save("./data/result/image.jpg")
         display(img)
 

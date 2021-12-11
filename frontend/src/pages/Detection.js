@@ -47,6 +47,23 @@ const Detection = () => {
       alert(error);
     }
   };
+
+  const saveImage = async () => {
+    var canvas = await document.createElement("canvas");
+    var ctx = await canvas.getContext("2d");
+    var img = await document.getElementById("downloadImage");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    var data = canvas.toDataURL("image/png");
+    window.location.href = data;
+    var a = document.createElement("a");
+    a.href = data;
+    a.download = "download.png";
+    document.body.appendChild(a);
+    a.click();
+  };
+
   return (
     <div className="detection">
       <div className="detection__upload">
@@ -56,7 +73,7 @@ const Detection = () => {
           data-aos-easing="ease-out-cubic"
           data-aos-duration="500"
         >
-          Upload an image for classification
+          Upload your image
         </div>
         <div className="detection__upload-action">
           <div className="detection__upload-img" data-aos="fade-right">
@@ -74,7 +91,12 @@ const Detection = () => {
           <div className="detection__result" data-aos="fade-left">
             {loading ? <Loading /> : ""}
             {imagePrediction ? (
-              <img className="detection__img" alt="" src={imagePrediction} />
+              <img
+                className="detection__img"
+                alt=""
+                id="downloadImage"
+                src={imagePrediction}
+              />
             ) : (
               <div className="text">Your prediction will receive here</div>
             )}
@@ -94,6 +116,12 @@ const Detection = () => {
             >
               {" "}
               Predict
+            </button>
+          )}
+          {imagePrediction && (
+            <button className="detection__button-download" onClick={saveImage}>
+              {" "}
+              Download
             </button>
           )}
         </div>

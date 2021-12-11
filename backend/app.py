@@ -2,14 +2,15 @@ from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
-import json
-import tensorflow as tf
+# import json
+# import tensorflow as tf
 from PIL import Image
 import base64
 import io
-
+import cv2 as cv
 from age_detect import *
 from script import *
+import glob
 
 app = Flask(__name__)
 
@@ -61,13 +62,27 @@ def upload_file():
 			filename = secure_filename(file.filename)
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
+	# clear faces
+	face_files = glob.glob("./data/faces/*")
+	human_files = glob.glob("./data/human/*")
 
+	for file in face_files:
+		os.remove(file)
+	for file in human_files:
+		os.remove(file)
+		
+	converted_image = cv.imread("./data/uploads/img.png")
+	cv.cvtColor(converted_image, cv.COLOR_BGR2RGB)
+	cv.imwrite("./data/uploads/img.png", converted_image)
 	# with graph.as_default():
-	faces = age_detection("./data/uploads/img.png") 
+
+	
 	image_path, detection_result, class_names, _MODEL_SIZE=object_detection(image_path=[str("./data/uploads/"+os.listdir("data/uploads/")[0])])
 
-	draw_boxes(image_path, detection_result, class_names, _MODEL_SIZE,faces)
+	draw_boxes(image_path, detection_result, class_names, _MODEL_SIZE)
 	data = preprocessing_image("./data/result/"+os.listdir("./data/result/")[0])
+
+	
 	return f'"data:image/png;base64,{data}"'
 
 
