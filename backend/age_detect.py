@@ -37,11 +37,14 @@ def read_image(image_path, face_id):
     image=cv.imread(image_path)
     detect_faces(haar_cascade_face, image, face_id=face_id)
 
-
-    temp_image = cv.imread("./data/faces/face_{0}.png".format(face_id)) 
-    temp_image =  cv.cvtColor(temp_image, cv.COLOR_BGR2RGB)
-    temp_image =  cv.resize(temp_image,(48,48))
-    faces_image.append(temp_image)
+    try:
+        temp_image = cv.imread("./data/faces/face_{0}.png".format(face_id)) 
+        temp_image =  cv.cvtColor(temp_image, cv.COLOR_BGR2RGB)
+        temp_image =  cv.resize(temp_image,(48,48))
+        faces_image.append(temp_image)
+    except:
+        print("Cant detect face")
+        return []
     return faces_image
 
 def predict_image(image):
