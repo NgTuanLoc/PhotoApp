@@ -155,6 +155,7 @@ def draw_boxes(img_names, boxes_dicts, class_names, model_size):
     Returns:
         None.
     """
+    print_class_names = []
     colors = ((np.array(color_palette("hls", 80)) * 255)).astype(np.uint8)
     for num, img_name, boxes_dict in zip(range(len(img_names)), img_names,
                                          boxes_dicts):
@@ -188,6 +189,7 @@ def draw_boxes(img_names, boxes_dicts, class_names, model_size):
                     
                     draw.text((x0, y0 - text_size[1]), text, fill='black',
                               font=font)
+                    print_class_names.append(class_names[cls])
                     if(class_names[cls]=="person"): 
                 #         print('''
                 #     x0: {0}
@@ -206,8 +208,11 @@ def draw_boxes(img_names, boxes_dicts, class_names, model_size):
                                 font=font)
                             draw.text((x0, y0 + text_size[1]), "Gender predicted: {}".format(gender), fill='yellow',
                                 font=font)                        
+        print("=============== PRINT CLASSNAMES ===============")
+        print(print_class_names)
         img.save("./data/result/image.jpg")
         display(img)
+        return print_class_names
 
 
 

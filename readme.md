@@ -2,7 +2,7 @@
 
 We divide our Application into backend for managing user input image and giving out prediction. The other is frowned which represents user interface and receive their input
 
-You can dowload our pretrained  [model](https://drive.google.com/drive/folders/1RhAhVkbceXfyZlDDbNCEiV5m-OJB6P2V?usp=sharing)
+You can dowload our pretrained  [model](https://drive.google.com/drive/folders/1RhAhVkbceXfyZlDDbNCEiV5m-OJB6P2V?usp=sharing) and remember to put the dowloaded folder in backend repo
 
 You can trained your own model with this the notebooks that we have attached  
 

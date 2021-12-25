@@ -43,7 +43,7 @@ def read_image(image_path, face_id):
         temp_image =  cv.resize(temp_image,(48,48))
         faces_image.append(temp_image)
     except:
-        print("Cant detect face")
+        print("Can not detect face !!!")
         return []
     return faces_image
 

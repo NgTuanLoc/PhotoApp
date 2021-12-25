@@ -11,6 +11,7 @@ import cv2 as cv
 from age_detect import *
 from script import *
 import glob
+from swapface import *
 
 app = Flask(__name__)
 
@@ -74,19 +75,52 @@ def upload_file():
 	converted_image = cv.imread("./data/uploads/img.png")
 	cv.cvtColor(converted_image, cv.COLOR_BGR2RGB)
 	cv.imwrite("./data/uploads/img.png", converted_image)
-	# with graph.as_default():
+	
+	image_path, detection_result, class_names, _MODEL_SIZE=object_detection(image_path=[str("./data/uploads/img.png")])
 
 	
-	image_path, detection_result, class_names, _MODEL_SIZE=object_detection(image_path=[str("./data/uploads/"+os.listdir("data/uploads/")[0])])
-
-	draw_boxes(image_path, detection_result, class_names, _MODEL_SIZE)
+	class_names_predict = draw_boxes(image_path, detection_result, class_names, _MODEL_SIZE)
+	class_names_predict = ",".join(class_names_predict)
+	f = open("./data/class_names.txt", "w")
+	f.write(class_names_predict)
+	f.close()
 	data = preprocessing_image("./data/result/"+os.listdir("./data/result/")[0])
-
 	
 	return f'"data:image/png;base64,{data}"'
 
+@app.route('/dowload', methods=['GET', 'POST'])
+def dowload_file():
+	if request.method == 'POST':
+		print("request data", request.data)
+		print("request files", request.files)
+
+		# check if the post request has the file part
+		if 'file' not in request.files:
+			return "No file part"
+		file = request.files['file']
 
 
+		if file and allowed_file(file.filename):
+			filename = secure_filename(file.filename)
+			file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))	
+	return "Success !"
+
+
+@app.route('/predict', methods=['GET', 'POST'])
+def predict():
+	faceSwap("./data/uploads/img_1.png","./data/uploads/img_2.png")
+	# object_detection(image_path=[str("./data/uploads/"+os.listdir("data/uploads/")[0])])
+	
+	data = preprocessing_image("./output/"+os.listdir("./output/")[0])
+	return f'"data:image/png;base64,{data}"'
+
+@app.route('/test', methods=['GET', 'POST'])
+def test():
+	f = open("./data/class_names.txt", "r")
+	class_names_preddict = f.read()
+	print("==========================")
+	print(class_names_preddict)
+	return class_names_preddict
 
 if __name__ == "__main__":
-	app.run(debug=True)
+	app.run(debug=True, host= "0.0.0.0")
